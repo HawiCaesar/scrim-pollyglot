@@ -21,13 +21,7 @@ export const App = () => {
       },
       {
         role: 'user',
-        content: `In this context you are going to help translate text within the ### from english to ${language}. 
-            The following needs translation
-            
-            ###
-            ${textToTranslate}
-            ###
-            `
+        content: `In this context you are going to help translate text in beetwen ### only from english to ${language}. The following needs translation ### ${textToTranslate} ###`
       }
     ];
 
