@@ -1,0 +1,17 @@
+body {
+    font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: bold;
+}
+#appName {
+    font-family: "Big Shoulders", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+}
+
+#appSubtitle {
+    font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
