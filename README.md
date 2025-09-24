@@ -5,6 +5,26 @@ npm install
 npm start
 ```
 
+### Main requirements 
+- Built from scratch ✅
+- Followed figma design (Not full desktop ready, leans more on mobile) ✅
+- Make sure to
+    - Setup the OpenAI API ✅
+    - Select a model ✅
+    - Engineer a prompt ✅
+    - Use a temperature ✅
+    - Use max_tokens (pending)
+    - Render the completion ✅
+- Use any framework or library (I used React) ✅
+
+### Stretch goals
+- Turn into a chat app, follow figma
+- Add functionality
+    - Ability to correct
+    - Add AI generated images
+- Handle errors 
+- Deploy (with API key hidden) ✅ parially. No key visible on github
+
 Head over to https://vitejs.dev/ to learn more about configuring vite
 ## About Scrimba
 
