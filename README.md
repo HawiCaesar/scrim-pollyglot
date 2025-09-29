@@ -18,7 +18,7 @@ npm start
 - Use any framework or library (I used React) ✅
 
 ### Stretch goals
-- Turn into a chat app, follow figma
+- Turn into a chat app, follow figma ✅
 - Add functionality
     - Ability to correct
     - Add AI generated images
