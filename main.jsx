@@ -96,7 +96,7 @@ export const App = () => {
   return (
     <div className='mb-8'>
       {/** header and logo */}
-      <div className='bg-[url("/assets/worldmap.png")] h-[200px] bg-top bg-no-repeat flex justify-center'>
+      <div className='bg-[url("/worldmap.png")] h-[200px] bg-top bg-no-repeat flex justify-center'>
         <div className='text-white flex flex-row'>
           <div className='self-center px-2'>
             <img src={parrot} width='90' height='80' />
