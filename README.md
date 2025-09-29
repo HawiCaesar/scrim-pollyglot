@@ -23,7 +23,7 @@ npm start
     - Ability to correct
     - Add AI generated images
 - Handle errors 
-- Deploy (with API key hidden) ✅ parially. No key visible on github
+- Deploy (with API key hidden) No key visible on github ✅
 
 Head over to https://vitejs.dev/ to learn more about configuring vite
 ## About Scrimba
