@@ -1,7 +1,8 @@
 body {
-    font-family: "Poppins", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 700;
   font-style: bold;
+  overflow: hidden;
 }
 #appName {
     font-family: "Big Shoulders", sans-serif;
@@ -14,4 +15,9 @@ body {
     font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-style: normal;
+}
+
+img {
+  image-rendering: auto;
+  -ms-interpolation-mode: bicubic;
 }
