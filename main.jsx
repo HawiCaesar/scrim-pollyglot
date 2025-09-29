@@ -10,7 +10,6 @@ export const App = () => {
   const [language, setLanguage] = useState('french');
   const [textValue, setTextValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [translatedResponse, setTranslatedResponse] = useState(null);
 
   const onTranslateUsingAI = async ({ language, textToTranslate }) => {
     setLoading(true);
@@ -22,7 +21,7 @@ export const App = () => {
       },
       {
         role: 'user',
-        content: `In this context you are going to help translate text in beetwen ### only from english to ${language}. The following needs translation ### ${textToTranslate} ###`
+        content: `In this context you are going to help translate text in beetwen ### only from english to ${language}. The following needs translation ### ${textToTranslate} ###. The translation should not include the instructions or the ###`
       }
     ];
 
@@ -36,13 +35,12 @@ export const App = () => {
         messages: messages,
         temperature: 0
       });
-      //setTranslatedResponse(response.choices[0].message.content);
       addTranslationToDiv(response.choices[0].message.content);
       setLoading(false);
     } catch (err) {
-      console.log('Error:', err);
       //loadingArea.innerText = 'Unable to access AI. Please refresh and try again'
       document.querySelector('#loading-translation').remove();
+      addErrorToDiv(err.message);
       setLoading(false);
     }
   };
@@ -53,6 +51,14 @@ export const App = () => {
 
   const onHandleTextToTranslate = (e) => {
     setTextValue(e.target.value);
+  };
+
+  const addErrorToDiv = (text) => {
+    const div = document.createElement('div');
+    div.innerHTML = `~~~ ERROR: Something went wrong while translating. Please refresh and try again. ${text} ~~~`;
+    div.className = 'text-white border border-[#BE123C] bg-[#BE123C] rounded-tl-xl rounded-bl-xl rounded-br-xl m-4 px-4 pt-2 pb-8';
+    div.id = 'error-text-div';
+    document.querySelector('#user-text-div').appendChild(div);
   };
 
   const addUserTextToDiv = (text) => {
@@ -85,11 +91,6 @@ export const App = () => {
     //place text entered to div right under
     addUserTextToDiv(textValue);
    await onTranslateUsingAI({ language, textToTranslate: textValue });
-  };
-
-  const onReset = () => {
-    setTranslatedResponse(null);
-    setTextValue('');
   };
 
   return (
