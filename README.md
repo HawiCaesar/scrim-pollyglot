@@ -20,9 +20,9 @@ npm start
 ### Stretch goals
 - Turn into a chat app, follow figma ✅
 - Add functionality
-    - Ability to correct
+    - Ability to correct ✅ (you will see 3 network requests, 1 for initial, 2 for translation to english, 3 for similarity check)
     - Add AI generated images
-- Handle errors 
+- Handle errors  ✅ (incase of errors there's a error that shows up for the user)
 - Deploy (with API key hidden) No key visible on github ✅
 
 Head over to https://vitejs.dev/ to learn more about configuring vite
