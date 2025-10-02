@@ -10,8 +10,9 @@ export const App = () => {
   const [language, setLanguage] = useState('french');
   const [textValue, setTextValue] = useState('');
   const [loading, setLoading] = useState(false);
+  const [timeTakenToTranslate, setTimeTakenToTranslate] = useState(0);
 
-  const onTranslateUsingAI = async ({ language, textToTranslate }) => {
+  const onTranslateUsingOpenAI = async ({ language, textToTranslate }) => {
     setLoading(true);
 
     const messages = [
@@ -35,15 +36,60 @@ export const App = () => {
         messages: messages,
         temperature: 0
       });
-      addTranslationToDiv(response.choices[0].message.content);
       setLoading(false);
+      return response.choices[0].message.content;
     } catch (err) {
-      //loadingArea.innerText = 'Unable to access AI. Please refresh and try again'
+      // TODO: come back to this
       document.querySelector('#loading-translation').remove();
       addErrorToDiv(err.message);
       setLoading(false);
     }
   };
+
+  const onTranslateAndCorrectUsingOpenAI = async ({ language, textToTranslate }) => {
+    const translatedText = await onTranslateUsingOpenAI({ language, textToTranslate });
+    const backTranslatedText = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedText });
+    
+    const check = await checkForSimilarity(textToTranslate, backTranslatedText);
+    if (check === 'Yes') {
+      addTranslationToDiv(translatedText);
+      return 
+    } else {
+
+      setTimeTakenToTranslate(timeTakenToTranslate + 1);
+
+      if (timeTakenToTranslate > 3) {
+        addErrorToDiv('Unable to get correct translation');
+        return 
+      } else {
+        return onTranslateAndCorrectUsingOpenAI({ language, textToTranslate });
+      }
+    }
+  };
+
+  const checkForSimilarity = async (originalUserText, backTranslatedText) => {
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are multilingual expert translation checker and assistant.'
+      },
+      {
+        role: 'user',
+        content: `In this context you are going to help check for similarity between two text. The following are the texts to check for similarity ### ${originalUserText} ### and ### ${backTranslatedText} ###. The similarity should not include the instructions or the ###. Answer only with "Yes" or "No"`
+      }
+    ];
+
+    const openai = new OpenAI({
+      dangerouslyAllowBrowser: true,
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY
+    });
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: messages,
+      temperature: 0
+    });
+    return response.choices[0].message.content;
+  }
 
   const onHandleLanguageChange = (e) => {
     setLanguage(e.target.value);
@@ -90,7 +136,7 @@ export const App = () => {
 
     //place text entered to div right under
     addUserTextToDiv(textValue);
-   await onTranslateUsingAI({ language, textToTranslate: textValue });
+   await onTranslateAndCorrectUsingOpenAI({ language, textToTranslate: textValue });
   };
 
   return (
