@@ -12,7 +12,7 @@ export const App = () => {
   const [loading, setLoading] = useState(false);
   const [timeTakenToTranslate, setTimeTakenToTranslate] = useState(0);
 
-  const onTranslateUsingOpenAI = async ({ language, textToTranslate }) => {
+  const onTranslateUsingOpenAI = async ({ language, textToTranslate, shouldGenerateNewImage = false }) => {
     setLoading(true);
 
     const messages = [
@@ -37,9 +37,34 @@ export const App = () => {
         temperature: 0
       });
       setLoading(false);
-      return response.choices[0].message.content;
+
+      const words = textToTranslate.trim().split(" ")
+
+      const isShort = words.length <= 2
+      const shouldGenerateImage = isShort // simple heuristic for nouns/short phrases
+
+      let imageUrl = '';
+      if (shouldGenerateNewImage && shouldGenerateImage) {
+        try {
+          const image = await openai.images.generate({
+            model: "dall-e-2",
+            prompt: textToTranslate,   // generate image based on original English text
+            size: "256x256",
+            n: 1
+          })
+          imageUrl = image.data[0].url
+        } catch (err) {
+          document.querySelector('#loading-translation').remove();
+          addErrorToDiv(err.message);
+          setLoading(false);
+        }
+      }
+
+      return {
+        translatedText: response.choices[0].message.content,
+        imageUrl: imageUrl
+      };
     } catch (err) {
-      // TODO: come back to this
       document.querySelector('#loading-translation').remove();
       addErrorToDiv(err.message);
       setLoading(false);
@@ -47,12 +72,13 @@ export const App = () => {
   };
 
   const onTranslateAndCorrectUsingOpenAI = async ({ language, textToTranslate }) => {
-    const translatedText = await onTranslateUsingOpenAI({ language, textToTranslate });
-    const backTranslatedText = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedText });
+    const translatedData = await onTranslateUsingOpenAI({ language, textToTranslate, shouldGenerateNewImage: true });
+    const backTranslatedData = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedData.translatedText });
     
-    const check = await checkForSimilarity(textToTranslate, backTranslatedText);
+    const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
     if (check === 'Yes') {
-      addTranslationToDiv(translatedText);
+      console.log({translatedData})
+      addTranslationToDiv(translatedData.translatedText, translatedData?.imageUrl);
       return 
     } else {
 
@@ -120,7 +146,7 @@ export const App = () => {
     document.querySelector('#user-text-div').appendChild(div2);
   };
 
-  const addTranslationToDiv = (text) => {
+  const addTranslationToDiv = (text, imageUrl) => {
     document.querySelector('#loading-translation').remove();
 
     const div = document.createElement('div');
@@ -128,6 +154,12 @@ export const App = () => {
     div.className = 'text-white border border-[#035A9D] bg-[#035A9D] rounded-tl-xl rounded-bl-xl rounded-br-xl m-4 px-4 pt-2 pb-8';
     div.id = 'translated-text-div';
     document.querySelector('#user-text-div').appendChild(div);
+
+    const div2 = document.createElement('div');
+    div2.innerHTML = `<img src="${imageUrl}" width='256' height='256' />`;
+    div2.className = 'text-black mx-8';
+    div2.id = 'translated-image-div';
+    document.querySelector('#user-text-div').appendChild(div2);
   };
 
   const onSubmitTranslateText = async (e) => {
