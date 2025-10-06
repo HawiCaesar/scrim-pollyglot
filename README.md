@@ -21,7 +21,7 @@ npm start
 - Turn into a chat app, follow figma ✅
 - Add functionality
     - Ability to correct ✅ (you will see 3 network requests, 1 for initial, 2 for translation to english, 3 for similarity check)
-    - Add AI generated images
+    - Add AI generated images ✅ (for nouns, red apple, green hat)
 - Handle errors  ✅ (incase of errors there's a error that shows up for the user)
 - Deploy (with API key hidden) No key visible on github ✅
 
