@@ -27,42 +27,46 @@ export const App = () => {
     ];
 
     try {
-      const openai = new OpenAI({
-        dangerouslyAllowBrowser: true,
-        apiKey: import.meta.env.VITE_OPENAI_API_KEY
+      
+
+      const response = await fetch('https://royal-surf-56aa.hawitrial.workers.dev/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          textToTranslate,
+          language,
+        })
       });
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: messages,
-        temperature: 0
-      });
+      const data = await response.json();
+
+      // const words = textToTranslate.trim().split(" ")
+
+      // const isShort = words.length <= 2
+      // const shouldGenerateImage = isShort // simple heuristic for nouns/short phrases
+
+      // let imageUrl = '';
+      // if (shouldGenerateNewImage && shouldGenerateImage) {
+      //   try {
+      //     const image = await openai.images.generate({
+      //       model: "dall-e-2",
+      //       prompt: textToTranslate,   // generate image based on original English text
+      //       size: "256x256",
+      //       n: 1
+      //     })
+      //     imageUrl = image.data[0].url
+      //   } catch (err) {
+      //     document.querySelector('#loading-translation').remove();
+      //     addErrorToDiv(err.message);
+      //     setLoading(false);
+      //   }
+      // }
       setLoading(false);
 
-      const words = textToTranslate.trim().split(" ")
-
-      const isShort = words.length <= 2
-      const shouldGenerateImage = isShort // simple heuristic for nouns/short phrases
-
-      let imageUrl = '';
-      if (shouldGenerateNewImage && shouldGenerateImage) {
-        try {
-          const image = await openai.images.generate({
-            model: "dall-e-2",
-            prompt: textToTranslate,   // generate image based on original English text
-            size: "256x256",
-            n: 1
-          })
-          imageUrl = image.data[0].url
-        } catch (err) {
-          document.querySelector('#loading-translation').remove();
-          addErrorToDiv(err.message);
-          setLoading(false);
-        }
-      }
-
       return {
-        translatedText: response.choices[0].message.content,
-        imageUrl: imageUrl
+        translatedText: data.choices[0].message.content,
+        imageUrl: ''
       };
     } catch (err) {
       document.querySelector('#loading-translation').remove();
@@ -73,23 +77,23 @@ export const App = () => {
 
   const onTranslateAndCorrectUsingOpenAI = async ({ language, textToTranslate }) => {
     const translatedData = await onTranslateUsingOpenAI({ language, textToTranslate, shouldGenerateNewImage: true });
-    const backTranslatedData = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedData.translatedText });
-    
-    const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
-    if (check === 'Yes') {
+    //const backTranslatedData = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedData.translatedText });
+    console.log({translatedData});
+    // const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
+    // if (check === 'Yes') {
       addTranslationToDiv(translatedData.translatedText, translatedData?.imageUrl);
-      return 
-    } else {
+    //   return 
+    // } else {
 
-      setTimeTakenToTranslate(timeTakenToTranslate + 1);
+    //   setTimeTakenToTranslate(timeTakenToTranslate + 1);
 
-      if (timeTakenToTranslate > 3) {
-        addErrorToDiv('Unable to get correct translation');
-        return 
-      } else {
-        return onTranslateAndCorrectUsingOpenAI({ language, textToTranslate });
-      }
-    }
+    //   if (timeTakenToTranslate > 3) {
+    //     addErrorToDiv('Unable to get correct translation');
+    //     return 
+    //   } else {
+    //     return onTranslateAndCorrectUsingOpenAI({ language, textToTranslate });
+    //   }
+    // }
   };
 
   const checkForSimilarity = async (originalUserText, backTranslatedText) => {
