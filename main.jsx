@@ -77,7 +77,6 @@ export const App = () => {
     
     const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
     if (check === 'Yes') {
-      console.log({translatedData})
       addTranslationToDiv(translatedData.translatedText, translatedData?.imageUrl);
       return 
     } else {
@@ -155,11 +154,15 @@ export const App = () => {
     div.id = 'translated-text-div';
     document.querySelector('#user-text-div').appendChild(div);
 
-    const div2 = document.createElement('div');
-    div2.innerHTML = `<img src="${imageUrl}" width='256' height='256' />`;
-    div2.className = 'text-black mx-8';
-    div2.id = 'translated-image-div';
-    document.querySelector('#user-text-div').appendChild(div2);
+    if (imageUrl) {
+
+      const div2 = document.createElement('div');
+      div2.innerHTML = `<img src="${imageUrl}" width='256' height='256' />`;
+      div2.className = 'text-black mx-8';
+      div2.id = 'translated-image-div';
+      document.querySelector('#user-text-div').appendChild(div2);
+    }
+
   };
 
   const onSubmitTranslateText = async (e) => {
