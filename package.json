@@ -8,9 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-dom": "18.0.0",
     "react": "18.0.0",
-    "openai": "4.14.2",
+    "react-dom": "18.0.0",
     "vite": "latest"
   },
   "devDependencies": {

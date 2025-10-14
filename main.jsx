@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import { useState } from 'react';
 import parrot from './assets/parrot.png';
 import frenchFlag from './assets/new_fr.png';
@@ -12,7 +11,7 @@ export const App = () => {
   const [loading, setLoading] = useState(false);
   const [timeTakenToTranslate, setTimeTakenToTranslate] = useState(0);
 
-  const onTranslateUsingOpenAI = async ({ language, textToTranslate, shouldGenerateNewImage = false }) => {
+  const onTranslateUsingOpenAI = async ({ language, textToTranslate, shouldGenerateNewImage = false, backTranslate = false }) => {
     setLoading(true);
 
     const messages = [
@@ -22,12 +21,16 @@ export const App = () => {
       },
       {
         role: 'user',
-        content: `In this context you are going to help translate text in beetwen ### only from english to ${language}. The following needs translation ### ${textToTranslate} ###. The translation should not include the instructions or the ###`
+        content: `In this context you are going to help translate text in beetwen ### only from ${backTranslate ? `${language} to english` : `english to ${language}`}. The following needs translation ### ${textToTranslate} ###. The translation should not include the instructions or the ###`
       }
     ];
 
     try {
       
+      const words = textToTranslate.trim().split(" ")
+
+      const isShort = words.length <= 2
+      const shouldGenerateImage = isShort && shouldGenerateNewImage // simple heuristic for nouns/short phrases
 
       const response = await fetch('https://royal-surf-56aa.hawitrial.workers.dev/', {
         method: 'POST',
@@ -35,38 +38,17 @@ export const App = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          textToTranslate,
-          language,
+          messages,
+          ...(shouldGenerateImage && { shouldGenerateImage: true, textToTranslate })
         })
       });
       const data = await response.json();
 
-      // const words = textToTranslate.trim().split(" ")
-
-      // const isShort = words.length <= 2
-      // const shouldGenerateImage = isShort // simple heuristic for nouns/short phrases
-
-      // let imageUrl = '';
-      // if (shouldGenerateNewImage && shouldGenerateImage) {
-      //   try {
-      //     const image = await openai.images.generate({
-      //       model: "dall-e-2",
-      //       prompt: textToTranslate,   // generate image based on original English text
-      //       size: "256x256",
-      //       n: 1
-      //     })
-      //     imageUrl = image.data[0].url
-      //   } catch (err) {
-      //     document.querySelector('#loading-translation').remove();
-      //     addErrorToDiv(err.message);
-      //     setLoading(false);
-      //   }
-      // }
       setLoading(false);
 
       return {
-        translatedText: data.choices[0].message.content,
-        imageUrl: ''
+        translatedText: data.response.content,
+        imageUrl: data.imageUrl
       };
     } catch (err) {
       document.querySelector('#loading-translation').remove();
@@ -77,23 +59,25 @@ export const App = () => {
 
   const onTranslateAndCorrectUsingOpenAI = async ({ language, textToTranslate }) => {
     const translatedData = await onTranslateUsingOpenAI({ language, textToTranslate, shouldGenerateNewImage: true });
-    //const backTranslatedData = await onTranslateUsingOpenAI({ language:'english', textToTranslate: translatedData.translatedText });
-    console.log({translatedData});
-    // const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
-    // if (check === 'Yes') {
+    const backTranslatedData = await onTranslateUsingOpenAI({ language, textToTranslate: translatedData.translatedText, shouldGenerateNewImage: false, backTranslate: true });
+
+    const check = await checkForSimilarity(textToTranslate, backTranslatedData.translatedText);
+
+     if (check === 'Yes') {
+      console.log({translatedData});
       addTranslationToDiv(translatedData.translatedText, translatedData?.imageUrl);
-    //   return 
-    // } else {
+      return 
+    } else {
 
-    //   setTimeTakenToTranslate(timeTakenToTranslate + 1);
+      setTimeTakenToTranslate(timeTakenToTranslate + 1);
 
-    //   if (timeTakenToTranslate > 3) {
-    //     addErrorToDiv('Unable to get correct translation');
-    //     return 
-    //   } else {
-    //     return onTranslateAndCorrectUsingOpenAI({ language, textToTranslate });
-    //   }
-    // }
+      if (timeTakenToTranslate > 3) {
+        addErrorToDiv('Unable to get correct translation');
+        return 
+      } else {
+        return onTranslateAndCorrectUsingOpenAI({ language, textToTranslate });
+      }
+    }
   };
 
   const checkForSimilarity = async (originalUserText, backTranslatedText) => {
@@ -108,16 +92,23 @@ export const App = () => {
       }
     ];
 
-    const openai = new OpenAI({
-      dangerouslyAllowBrowser: true,
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY
-    });
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: messages,
-      temperature: 0
-    });
-    return response.choices[0].message.content;
+    try {
+
+      const response = await fetch('https://royal-surf-56aa.hawitrial.workers.dev/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages
+        })
+      });
+      const data = await response.json();
+      return data.response.content;
+    } catch (err) {
+      document.querySelector('#loading-translation').remove();
+      addErrorToDiv(err.message);
+    }
   }
 
   const onHandleLanguageChange = (e) => {
