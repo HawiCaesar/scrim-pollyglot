@@ -23,7 +23,7 @@ npm start
     - Ability to correct ✅ (you will see 3 network requests, 1 for initial, 2 for translation to english, 3 for similarity check)
     - Add AI generated images ✅ (for nouns, red apple, green hat)
 - Handle errors  ✅ (incase of errors there's a error that shows up for the user)
-- Deploy (with API key hidden) No key visible on github ✅
+- Deploy (with API key hidden) No key visible on github and on client requests ✅
 
 Head over to https://vitejs.dev/ to learn more about configuring vite
 ## About Scrimba
